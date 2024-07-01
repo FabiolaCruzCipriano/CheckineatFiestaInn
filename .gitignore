@@ -36,3 +36,4 @@ build/
 # Keys and certificates
 *.pem
 *.key
+.mde
