@@ -1,0 +1,14 @@
+/* src/components/Login.css */
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.login-button {
+    background-color: #3490dc;
+    color: white;
+}
+
+.login-button:hover {
+    background-color: #2779bd;
+}
