@@ -1,15 +1,14 @@
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const Departamento = require('./departamento');
-const Empleado = sequelize.define('Empleado', {
+
+class Empleado extends Model { }
+
+Empleado.init({
     id_empleado: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
-    },
-    id_departamento: {
-        type: DataTypes.INTEGER,
-        allowNull: false
     },
     nombre: {
         type: DataTypes.STRING,
@@ -26,10 +25,26 @@ const Empleado = sequelize.define('Empleado', {
     numeroempleado: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    nombre_departamento: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        references: {
+            model: Departamento,
+            key: 'nombre_departamento'
+        }
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 }, {
+    sequelize,
+    modelName: 'Empleado',
     tableName: 'empleado',
     timestamps: false
 });
-Empleado.belongsTo(Departamento, { foreignKey: 'id_departamento' });
+
+Empleado.belongsTo(Departamento, { foreignKey: 'nombre_departamento', targetKey: 'nombre_departamento' });
+
 module.exports = Empleado;

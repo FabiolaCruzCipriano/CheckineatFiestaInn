@@ -1,7 +1,9 @@
-// server.js
+require('dotenv').config();
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const enviarCorreo = require('./enviarCorreo');
 const path = require('path');
 const cors = require('cors');
 const sequelize = require('./config/database');
@@ -28,6 +30,22 @@ app.use(session({
     saveUninitialized: false,
 }));
 
+app.post('/api/enviarCorreo', async (req, res) => {
+    const { to, subject, text, html, qrDataUrl } = req.body;
+
+    if (!to || !subject || !html || !qrDataUrl) {
+        return res.status(400).send('Faltan parámetros necesarios.');
+    }
+
+    try {
+        await enviarCorreo(to, subject, text, html, qrDataUrl);
+        res.status(200).send('Correo enviado');
+    } catch (error) {
+        console.error('Error al enviar el correo:', error);
+        res.status(500).send('Error al enviar el correo');
+    }
+});
+
 app.use(express.json());
 
 app.use('/auth', authRoutes);
@@ -47,7 +65,8 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
-sequelize.sync({ alter: true }).then(() => {
+sequelize.authenticate().then(() => {
+    console.log('Conexión a la base de datos establecida exitosamente.');
     app.listen(PORT, () => {
         console.log(`Servidor corriendo en el puerto ${PORT}`);
     });

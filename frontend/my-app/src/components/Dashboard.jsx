@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaUser, FaBuilding, FaChartBar, FaBell, FaCog, FaBars, FaTimes } from 'react-icons/fa';
-import { Line } from 'react-chartjs-2';
+import { FaUser, FaBuilding, FaChartBar, FaBell, FaCog, FaBars, FaTimes, FaClipboardList, FaCheckCircle } from 'react-icons/fa';
+import { Line, Bar } from 'react-chartjs-2';
 import StatCard from './StatCard';
 
 import {
@@ -36,34 +36,46 @@ const Dashboard = () => {
         setSidebarOpen(!sidebarOpen);
     };
 
-    // Datos de ejemplo para el gráfico
-    const data = {
+    const empleadosData = {
         labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
         datasets: [
             {
                 label: 'Empleados',
                 data: [12, 19, 3, 5, 2, 3, 7, 11, 6, 9, 15, 12],
-                backgroundColor: 'rgba(178, 0, 39, 0.2)',
-                borderColor: '#B20027',
+                backgroundColor: 'rgba(178, 0, 39, 0.2)', // Asegúrate de que este color sea el mismo
+                borderColor: '#B20027', // Asegúrate de que este color sea el mismo
                 borderWidth: 2,
                 pointBackgroundColor: '#B20027',
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
                 pointHoverBorderColor: '#B20027',
-                fill: true, // Relleno debajo de la línea
-                tension: 0.4, // Curvatura de la línea
+                fill: true,
+                tension: 0.4,
             },
         ],
     };
 
-    const options = {
+    const departamentosData = {
+        labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+        datasets: [
+            {
+                label: 'Departamentos',
+                data: [4, 5, 4, 6, 5, 6, 7, 8, 7, 6, 5, 6],
+                backgroundColor: '#B20027', // Asegúrate de que este color sea el mismo
+                borderColor: '#B20027', // Asegúrate de que este color sea el mismo
+                borderWidth: 1,
+            },
+        ],
+    };
+
+    const chartOptions = {
         responsive: true,
         plugins: {
             legend: {
                 display: true,
                 position: 'top',
                 labels: {
-                    color: 'gray', // Color de las etiquetas de la leyenda
+                    color: 'gray',
                 },
             },
             tooltip: {
@@ -71,7 +83,7 @@ const Dashboard = () => {
                 backgroundColor: 'rgba(0,0,0,0.7)',
                 titleColor: '#fff',
                 bodyColor: '#fff',
-                borderColor: '#B20027', // Color del borde del tooltip ajustado al color del logotipo
+                borderColor: '#B20027', // Asegúrate de que este color sea el mismo
                 borderWidth: 1,
             },
         },
@@ -96,8 +108,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-100">
-            {/* Header */}
+        <div className="flex flex-col min-h-screen bg-gray-100 font-sans">
             <header className="bg-white shadow-md p-4 flex justify-between items-center">
                 <div className="flex items-center">
                     <button onClick={toggleSidebar} className="md:hidden text-gray-800 hover:text-gray-600 transition duration-200">
@@ -109,11 +120,11 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-4">
                     <FaBell className="text-gray-800 hover:text-gray-600 transition duration-200" />
                     <FaCog className="text-gray-800 hover:text-gray-600 transition duration-200" />
+                    <div className="text-gray-800">John Doe</div>
                 </div>
             </header>
 
             <div className="flex flex-1">
-                {/* Sidebar */}
                 <div className={`fixed md:static z-50 w-64 bg-[#B20027] text-white shadow-lg flex flex-col justify-between transition-transform duration-300 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
                     <div>
                         <div className="p-8 text-2xl font-extrabold border-b">Dashboard</div>
@@ -129,6 +140,12 @@ const Dashboard = () => {
                                         <FaBuilding className="mr-2" /> Departamentos
                                     </Link>
                                 </li>
+
+                                <li className="mb-4">
+                                    <Link to="/registros" className="flex items-center text-white hover:text-gray-200 transition-colors duration-200">
+                                        <FaClipboardList className="mr-2" /> Registros
+                                    </Link>
+                                </li>
                                 <li className="mb-4">
                                     <Link to="/reportes" className="flex items-center text-white hover:text-gray-200 transition-colors duration-200">
                                         <FaChartBar className="mr-2" /> Reportes
@@ -139,23 +156,28 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Main content */}
                 <div className="flex-1 p-4 md:p-8">
-                    {/* Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                        <StatCard title="Total Empleados" value="150" icon={<FaUser />} color="#FF89A2" />
-                        <StatCard title="Departamentos" value="5" icon={<FaChartBar />} color="#FF89A2" />
+                        <StatCard title="Total Empleados" value="150" icon={<FaUser />} color="bg-[#B20027]" />
+                        <StatCard title="Departamentos" value="5" icon={<FaBuilding />} color="bg-[#B20027]" />
+                        <StatCard title="Asistencia Diaria" value="140" icon={<FaCheckCircle />} color="bg-[#B20027]" />
                     </div>
 
-                    {/* Charts */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         <div className="bg-white p-4 rounded-lg shadow-md">
                             <h2 className="text-xl font-bold mb-4">Empleados por Mes</h2>
-                            <Line data={data} options={options} />
+                            <Line data={empleadosData} options={chartOptions} />
+                        </div>
+                        <div className="bg-white p-4 rounded-lg shadow-md">
+                            <h2 className="text-xl font-bold mb-4">Departamentos por Mes</h2>
+                            <Bar data={departamentosData} options={chartOptions} />
                         </div>
                     </div>
                 </div>
             </div>
+            <footer className="bg-white shadow-md p-4 flex justify-center items-center">
+                <p className="text-gray-600">&copy; 2023 CheckInEat. Todos los derechos reservados.</p>
+            </footer>
         </div>
     );
 };

@@ -1,18 +1,24 @@
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Departamento = sequelize.define('Departamento', {
+class Departamento extends Model { }
+
+Departamento.init({
     id_departamento: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
     },
     nombre_departamento: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
+        unique: true
+    }
 }, {
-    tableName: 'departamento'
+    sequelize,
+    modelName: 'Departamento',
+    tableName: 'departamento',
+    timestamps: false
 });
 
 module.exports = Departamento;

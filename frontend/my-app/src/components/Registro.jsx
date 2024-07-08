@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { QrReader } from '@blackbox-vision/react-qr-reader';
+import QrScanner from 'react-qr-scanner';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -9,8 +9,9 @@ const Registro = () => {
     const [scanSuccess, setScanSuccess] = useState(false);
     const errorTimeout = useRef(null);
 
-    const handleScan = async (result) => {
-        if (result) {
+    const handleScan = async (data) => {
+        if (data) {
+            const result = data.text; // Obtener el texto del resultado
             setEmpleadoNumero(result);
             setScanSuccess(true);
             toast.success(`Empleado ${result} registrado exitosamente!`, {
@@ -62,22 +63,20 @@ const Registro = () => {
         }, 5000);
     };
 
+    const previewStyle = {
+        height: 240,
+        width: 320,
+    };
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
             <div className="bg-white shadow-md rounded-lg p-6 max-w-lg w-full">
                 <h1 className="text-2xl font-semibold mb-4 text-center">Registro de Empleado</h1>
-                <QrReader
-                    onResult={(result, error) => {
-                        if (result) {
-                            handleScan(result?.text);
-                        }
-                        if (error) {
-                            handleError(error);
-                        }
-                    }}
-                    constraints={{ facingMode: 'environment' }}
-                    scanDelay={300}
-                    style={{ width: '100%' }}
+                <QrScanner
+                    delay={300}
+                    style={previewStyle}
+                    onError={handleError}
+                    onScan={handleScan}
                 />
                 {empleadoNumero && (
                     <p className="mt-4 text-green-600 text-lg font-semibold text-center">

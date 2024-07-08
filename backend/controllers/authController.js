@@ -4,7 +4,7 @@ const Administrador = require('../models/administrador');
 const register = async (req, res) => {
     const { nombre, apellido, correo_electronico, contrasena } = req.body;
 
-    try {
+try {
         const existingAdmin = await Administrador.findOne({ where: { correo_electronico } });
         if (existingAdmin) {
             return res.status(400).json({ error: 'El correo electrónico ya está en uso' });

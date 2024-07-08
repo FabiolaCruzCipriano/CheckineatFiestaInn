@@ -1,3 +1,5 @@
+// backend/controllers/departamentoController.js
+
 const Departamento = require('../models/departamento');
 
 const createDepartamento = async (req, res) => {
