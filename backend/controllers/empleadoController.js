@@ -1,5 +1,6 @@
 const { Empleado, Departamento } = require('../models');
 const enviarCorreo = require('../enviarCorreo');
+const QRCode = require('qrcode');
 
 exports.getEmpleados = async (req, res) => {
     try {
@@ -28,9 +29,7 @@ exports.createEmpleado = async (req, res) => {
             email
         });
 
-        // Enviar correo con QR Code
         const qrDataUrl = `data:image/png;base64,${Buffer.from(await QRCode.toDataURL(numeroempleado)).toString('base64')}`;
-
         await enviarCorreo(email, 'Tu código QR', '', `<p>Hola ${nombre},</p><p>Aquí está tu código QR:</p><img src="${qrDataUrl}" alt="Código QR" />`);
 
         res.status(201).json(nuevoEmpleado);
@@ -63,5 +62,14 @@ exports.deleteEmpleado = async (req, res) => {
     } catch (error) {
         console.error('Error al eliminar el empleado:', error);
         res.status(500).send('Error al eliminar el empleado');
+    }
+};
+
+exports.getTotalEmpleados = async (req, res) => {
+    try {
+        const count = await Empleado.count();
+        res.status(200).json({ totalEmpleados: count });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al contar empleados' });
     }
 };

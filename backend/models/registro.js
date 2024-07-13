@@ -24,13 +24,18 @@ const Registro = sequelize.define('Registro', {
         allowNull: false
     },
     fecha_asistencia: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: false
     },
     hora_asistencia: {
         type: DataTypes.TIME,
         allowNull: false
     }
+}, {
+    sequelize,
+    modelName: 'Registro',
+    tableName: 'registro', // Asegúrate de que este nombre coincide con el nombre de la tabla en la base de datos
+    timestamps: false
 });
 
 module.exports = Registro;

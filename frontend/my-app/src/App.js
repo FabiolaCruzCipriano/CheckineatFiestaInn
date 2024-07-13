@@ -6,6 +6,7 @@ import Empleados from './components/Empleados';
 import Departamentos from './components/Departamentos';
 import Reportes from './components/Reportes';
 import Registro from './components/Registro'; // Asegúrate de que está importado correctamente
+import VerRegistros from './components/VerRegistros'; // Importa el nuevo componente
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/departamentos" element={<Departamentos />} />
         <Route path="/reportes" element={<Reportes />} />
         <Route path="/registros" element={<Registro />} /> {/* Asegúrate de que la ruta es correcta */}
+        <Route path="/ver-registros" element={<VerRegistros />} /> {/* Nueva ruta para ver registros */}
       </Routes>
     </Router>
   );

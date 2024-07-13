@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
@@ -8,12 +7,14 @@ const path = require('path');
 const cors = require('cors');
 const sequelize = require('./config/database');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
+
 const administradorRoutes = require('./routes/administradorRoutes');
 const empleadoRoutes = require('./routes/empleadoRoutes');
 const registroRoutes = require('./routes/registroRoutes');
 const departamentoRoutes = require('./routes/departamentoRoutes');
 const reporteRoutes = require('./routes/reporteRoutes');
 const authRoutes = require('./routes/authRoutes');
+const asistenciaRoutes = require('./routes/asistenciaRoutes');
 
 const app = express();
 
@@ -54,13 +55,14 @@ app.use('/empleados', empleadoRoutes);
 app.use('/registros', registroRoutes);
 app.use('/departamentos', departamentoRoutes);
 app.use('/reportes', reporteRoutes);
+app.use('/asistencia', asistenciaRoutes);
 
 // Servir archivos estáticos de React
 app.use(express.static(path.join(__dirname, 'frontend', 'my-app', 'build')));
 
 // Ruta catch-all para devolver el archivo index.html de React
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'frontend', 'my-app', 'build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'frontend', 'my-app', 'build', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3001;

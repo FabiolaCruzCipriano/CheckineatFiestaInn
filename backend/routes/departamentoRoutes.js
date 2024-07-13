@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const departamentoController = require('../controllers/departamentoController');
 
+router.get('/total', departamentoController.countDepartamentos);
 router.get('/', departamentoController.getDepartamentos);
 router.post('/', departamentoController.createDepartamento);
 router.get('/:id', departamentoController.getDepartamentoById);

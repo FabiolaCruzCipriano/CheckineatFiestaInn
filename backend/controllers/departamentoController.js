@@ -1,5 +1,3 @@
-// backend/controllers/departamentoController.js
-
 const Departamento = require('../models/departamento');
 
 const createDepartamento = async (req, res) => {
@@ -64,10 +62,21 @@ const deleteDepartamento = async (req, res) => {
     }
 };
 
+const countDepartamentos = async (req, res) => {
+    try {
+        const count = await Departamento.count();
+        res.status(200).json({ count });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al contar departamentos' });
+    }
+};
+
 module.exports = {
     createDepartamento,
     getDepartamentos,
     getDepartamentoById,
     updateDepartamento,
-    deleteDepartamento
+    deleteDepartamento,
+    countDepartamentos,
 };

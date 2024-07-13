@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { FaPlus, FaTrash, FaEdit, FaSearch, FaBuilding, FaUser, FaIdBadge, FaEnvelope, FaDownload } from 'react-icons/fa';
-import { QRCode } from 'react-qrcode-logo'; // Importa QRCode desde react-qrcode-logo
+import { QRCode } from 'react-qrcode-logo'; 
 import Footer from './Footer';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';

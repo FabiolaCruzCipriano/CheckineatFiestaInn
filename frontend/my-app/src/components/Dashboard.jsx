@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUser, FaBuilding, FaChartBar, FaBell, FaCog, FaBars, FaTimes, FaClipboardList, FaCheckCircle } from 'react-icons/fa';
 import { Line, Bar } from 'react-chartjs-2';
+import axios from 'axios';
 import StatCard from './StatCard';
 
 import {
@@ -31,19 +32,42 @@ ChartJS.register(
 
 const Dashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [totalEmpleados, setTotalEmpleados] = useState(0);
+    const [totalDepartamentos, setTotalDepartamentos] = useState(0);
+    const [asistenciaDiaria, setAsistenciaDiaria] = useState(0);
 
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
     };
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            try {
+                const empleadosResponse = await axios.get('http://localhost:3001/empleados/total');
+                setTotalEmpleados(empleadosResponse.data.totalEmpleados);
+
+                const departamentosResponse = await axios.get('http://localhost:3001/departamentos/total');
+                setTotalDepartamentos(departamentosResponse.data.count);
+
+                const asistenciaResponse = await axios.get('http://localhost:3001/asistencia/diaria');
+                setAsistenciaDiaria(asistenciaResponse.data.asistenciaDiaria);
+            } catch (error) {
+                console.error('Error fetching counts:', error);
+                // alert('Error fetching data. Please try again later.'); // Esta es la línea que debes comentar o eliminar
+            }
+        };
+
+        fetchCounts();
+    }, []);
 
     const empleadosData = {
         labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
         datasets: [
             {
                 label: 'Empleados',
-                data: [12, 19, 3, 5, 2, 3, 7, 11, 6, 9, 15, 12],
-                backgroundColor: 'rgba(178, 0, 39, 0.2)', // Asegúrate de que este color sea el mismo
-                borderColor: '#B20027', // Asegúrate de que este color sea el mismo
+                data: [12, 19, 3, 5, 2, 3, 7, 11, 6, 9, 15, 12], // Replace with real data if available
+                backgroundColor: 'rgba(178, 0, 39, 0.2)',
+                borderColor: '#B20027',
                 borderWidth: 2,
                 pointBackgroundColor: '#B20027',
                 pointBorderColor: '#fff',
@@ -60,9 +84,9 @@ const Dashboard = () => {
         datasets: [
             {
                 label: 'Departamentos',
-                data: [4, 5, 4, 6, 5, 6, 7, 8, 7, 6, 5, 6],
-                backgroundColor: '#B20027', // Asegúrate de que este color sea el mismo
-                borderColor: '#B20027', // Asegúrate de que este color sea el mismo
+                data: [4, 5, 4, 6, 5, 6, 7, 8, 7, 6, 5, 6], // Replace with real data if available
+                backgroundColor: '#B20027',
+                borderColor: '#B20027',
                 borderWidth: 1,
             },
         ],
@@ -83,7 +107,7 @@ const Dashboard = () => {
                 backgroundColor: 'rgba(0,0,0,0.7)',
                 titleColor: '#fff',
                 bodyColor: '#fff',
-                borderColor: '#B20027', // Asegúrate de que este color sea el mismo
+                borderColor: '#B20027',
                 borderWidth: 1,
             },
         },
@@ -140,7 +164,6 @@ const Dashboard = () => {
                                         <FaBuilding className="mr-2" /> Departamentos
                                     </Link>
                                 </li>
-
                                 <li className="mb-4">
                                     <Link to="/registros" className="flex items-center text-white hover:text-gray-200 transition-colors duration-200">
                                         <FaClipboardList className="mr-2" /> Registros
@@ -158,9 +181,9 @@ const Dashboard = () => {
 
                 <div className="flex-1 p-4 md:p-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                        <StatCard title="Total Empleados" value="150" icon={<FaUser />} color="bg-[#B20027]" />
-                        <StatCard title="Departamentos" value="5" icon={<FaBuilding />} color="bg-[#B20027]" />
-                        <StatCard title="Asistencia Diaria" value="140" icon={<FaCheckCircle />} color="bg-[#B20027]" />
+                        <StatCard title="Total Empleados" value={totalEmpleados} icon={<FaUser />} color="bg-[#B20027]" />
+                        <StatCard title="Departamentos" value={totalDepartamentos} icon={<FaBuilding />} color="bg-[#B20027]" />
+                        <StatCard title="Asistencia Diaria" value={asistenciaDiaria} icon={<FaCheckCircle />} color="bg-[#B20027]" />
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -176,7 +199,7 @@ const Dashboard = () => {
                 </div>
             </div>
             <footer className="bg-white shadow-md p-4 flex justify-center items-center">
-                <p className="text-gray-600">&copy; 2023 CheckInEat. Todos los derechos reservados.</p>
+                <p className="text-gray-600">&copy; 2024 CheckInEat. Todos los derechos reservados.</p>
             </footer>
         </div>
     );

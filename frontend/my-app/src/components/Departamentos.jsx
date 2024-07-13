@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { FaPlus, FaTrash, FaBuilding } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit, FaSearch, FaBuilding } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-
 import * as yup from 'yup';
 import 'sweetalert2/src/sweetalert2.scss';
+import Footer from './Footer';
 
 const schema = yup.object().shape({
     nombre_departamento: yup.string().required('Nombre del departamento es requerido')
@@ -18,6 +18,9 @@ const Departamentos = () => {
         resolver: yupResolver(schema)
     });
     const [isLoading, setIsLoading] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const cargarDepartamentos = useCallback(async () => {
         setIsLoading(true);
@@ -53,15 +56,30 @@ const Departamentos = () => {
     const onSubmit = async (data) => {
         setIsLoading(true);
         try {
-            await axios.post(`${process.env.REACT_APP_API_URL}/departamentos`, data);
+            if (editMode) {
+                await axios.put(`${process.env.REACT_APP_API_URL}/departamentos/${editingId}`, data);
+                showMessage('Departamento actualizado exitosamente.', 'success');
+            } else {
+                await axios.post(`${process.env.REACT_APP_API_URL}/departamentos`, data);
+                showMessage('Departamento agregado exitosamente.', 'success');
+            }
             cargarDepartamentos();
             reset();
-            showMessage('Departamento agregado exitosamente.', 'success');
+            setEditMode(false);
+            setEditingId(null);
             setIsLoading(false);
         } catch (error) {
-            showMessage('Error al agregar el departamento.', 'error');
+            showMessage('Error al procesar el departamento.', 'error');
             setIsLoading(false);
         }
+    };
+
+    const iniciarEdicion = (departamento) => {
+        reset({
+            nombre_departamento: departamento.nombre_departamento
+        });
+        setEditMode(true);
+        setEditingId(departamento.id_departamento);
     };
 
     const eliminarDepartamento = async (id_departamento) => {
@@ -70,8 +88,8 @@ const Departamentos = () => {
             text: "¡No podrás revertir esto!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
             confirmButtonText: 'Sí, eliminarlo!',
             customClass: {
                 popup: 'swal2-popup-custom',
@@ -100,7 +118,7 @@ const Departamentos = () => {
             <main>
                 <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Departamentos</h1>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="mb-6 p-4 border rounded shadow-md bg-white">
+                <form onSubmit={handleSubmit(onSubmit)} className="mb-6 p-4 border rounded-md shadow-md bg-white">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="relative">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -110,24 +128,37 @@ const Departamentos = () => {
                                 type="text"
                                 placeholder="Nombre del Departamento"
                                 {...register('nombre_departamento')}
-                                className={`p-2 pl-10 border ${errors.nombre_departamento ? 'border-red-500' : 'border-gray-300'} rounded w-full focus:ring focus:ring-fiestaRed-light`}
+                                className={`p-2 pl-10 border ${errors.nombre_departamento ? 'border-red-500' : 'border-gray-300'} rounded-md w-full focus:ring focus:ring-fiestaRed-light`}
                             />
                             {errors.nombre_departamento && <p className="text-red-500 text-sm mt-1">{errors.nombre_departamento.message}</p>}
                         </div>
                         <div className="flex justify-center md:justify-end">
                             <button
                                 type="submit"
-                                className="p-2 bg-fiestaRed-medium text-white rounded h-10 w-35 flex items-center justify-center shadow-md hover:bg-fiestaRed-dark transition duration-200"
+                                className="p-2 bg-[#B20027] text-white rounded-md h-10 w-35 flex items-center justify-center shadow-md hover:bg-[#742A2A] transition duration-200"
                                 disabled={isLoading}
                             >
-                                {isLoading ? 'Agregando...' : <>
+                                {editMode ? 'Actualizar Departamento' : <>
                                     <FaPlus className="mr-2" />
-                                    Agregar Departamento
+                                    {isLoading ? 'Procesando...' : 'Agregar'}
                                 </>}
                             </button>
                         </div>
                     </div>
                 </form>
+
+                <div className="relative mb-6 max-w-xs">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <FaSearch className="text-gray-400" />
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="Buscar departamento"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="p-2 pl-8 border border-gray-300 rounded-md w-full focus:ring focus:ring-fiestaRed-light"
+                    />
+                </div>
 
                 <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-lg">
                     <table className="min-w-full">
@@ -138,16 +169,24 @@ const Departamentos = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {departamentos.map((departamento) => (
+                            {departamentos.filter((departamento) =>
+                                departamento.nombre_departamento.toLowerCase().includes(searchTerm.toLowerCase())
+                            ).map((departamento) => (
                                 <tr key={departamento.id_departamento} className="hover:bg-gray-50 transition duration-200">
                                     <td className="py-2 px-4 border-b border-gray-200">{departamento.nombre_departamento}</td>
-                                    <td className="py-2 px-4 border-b border-gray-200">
+                                    <td className="py-2 px-4 border-b border-gray-200 flex space-x-2">
+                                        <button
+                                            onClick={() => iniciarEdicion(departamento)}
+                                            className="p-1 bg-yellow-500 text-white rounded-md shadow-md hover:bg-yellow-600 transition duration-200"
+                                        >
+                                            <FaEdit />
+                                        </button>
                                         <button
                                             onClick={() => eliminarDepartamento(departamento.id_departamento)}
-                                            className="p-1 bg-red-500 text-white rounded shadow-md hover:bg-red-600 transition duration-200"
+                                            className="p-1 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition duration-200"
                                             disabled={isLoading}
                                         >
-                                            {isLoading ? 'Eliminando...' : <FaTrash />}
+                                            <FaTrash />
                                         </button>
                                     </td>
                                 </tr>
@@ -156,6 +195,7 @@ const Departamentos = () => {
                     </table>
                 </div>
             </main>
+            <Footer />
         </div>
     );
 };
