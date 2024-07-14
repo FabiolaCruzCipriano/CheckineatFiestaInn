@@ -15,7 +15,7 @@ exports.createRegistro = async (req, res) => {
         const horaAsistencia = fechaHora.toTimeString().split(' ')[0];
 
         const registro = await Registro.create({
-            id_empleado: empleado.id_empleado,
+            numeroempleado: numeroEmpleado,
             nombre: empleado.nombre,
             apellidos: empleado.apellidos,
             departamento: empleado.nombre_departamento,

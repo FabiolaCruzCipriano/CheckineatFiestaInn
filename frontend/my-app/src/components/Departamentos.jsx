@@ -135,7 +135,7 @@ const Departamentos = () => {
                         <div className="flex justify-center md:justify-end">
                             <button
                                 type="submit"
-                                className="p-2 bg-[#B20027] text-white rounded-md h-10 w-35 flex items-center justify-center shadow-md hover:bg-[#742A2A] transition duration-200"
+                                className="p-2 bg-[#B20027] text-white rounded-md h-10 w-40 flex items-center justify-center shadow-md hover:bg-[#742A2A] transition duration-200"
                                 disabled={isLoading}
                             >
                                 {editMode ? 'Actualizar Departamento' : <>
@@ -177,13 +177,13 @@ const Departamentos = () => {
                                     <td className="py-2 px-4 border-b border-gray-200 flex space-x-2">
                                         <button
                                             onClick={() => iniciarEdicion(departamento)}
-                                            className="p-1 bg-yellow-500 text-white rounded-md shadow-md hover:bg-yellow-600 transition duration-200"
+                                            className="p-1 bg-[#B20027] text-white rounded-md shadow-md hover:bg-[#742A2A] transition duration-200"
                                         >
                                             <FaEdit />
                                         </button>
                                         <button
                                             onClick={() => eliminarDepartamento(departamento.id_departamento)}
-                                            className="p-1 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition duration-200"
+                                            className="p-1 bg-[#B20027] text-white rounded-md shadow-md hover:bg-[#742A2A] transition duration-200"
                                             disabled={isLoading}
                                         >
                                             <FaTrash />

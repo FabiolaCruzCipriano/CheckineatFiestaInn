@@ -7,7 +7,7 @@ const Registro = sequelize.define('Registro', {
         primaryKey: true,
         autoIncrement: true
     },
-    id_empleado: {
+    numeroempleado: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
@@ -34,7 +34,7 @@ const Registro = sequelize.define('Registro', {
 }, {
     sequelize,
     modelName: 'Registro',
-    tableName: 'registro', // Asegúrate de que este nombre coincide con el nombre de la tabla en la base de datos
+    tableName: 'registro',
     timestamps: false
 });
 

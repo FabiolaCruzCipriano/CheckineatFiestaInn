@@ -1,190 +1,203 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { FiLoader } from 'react-icons/fi';
+
+const logoPath = '/logo.jpeg';  // Ruta relativa a la imagen del logo en la carpeta public
 
 const Reportes = () => {
     const [reportes, setReportes] = useState([]);
-    const [formData, setFormData] = useState({ id_registro: '', id_administrador: '', fecha_inicio: '', fecha_fin: '', tipo_reporte: '', contenido: '' });
-    const [editando, setEditando] = useState(false);
-    const [reporteEditando, setReporteEditando] = useState(null);
+    const [fechaInicio, setFechaInicio] = useState('');
+    const [fechaFin, setFechaFin] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [tipoReporte, setTipoReporte] = useState(''); // Estado para el tipo de reporte
 
-    useEffect(() => {
-        obtenerReportes();
-    }, []);
-
-    const obtenerReportes = async () => {
-        try {
-            const response = await axios.get('/api/reportes');
-            setReportes(response.data);
-        } catch (error) {
-            console.error('Error al obtener reportes:', error);
+    const validarFechas = () => {
+        if (new Date(fechaInicio) > new Date(fechaFin)) {
+            toast.error('La fecha de inicio no puede ser mayor que la fecha de fin.');
+            return false;
         }
+        return true;
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
+    const generarReporte = async (tipo) => {
+        if (!validarFechas()) return;
 
-    const agregarReporte = async () => {
-        if (formData.id_registro && formData.id_administrador && formData.fecha_inicio && formData.fecha_fin && formData.tipo_reporte && formData.contenido) {
-            try {
-                const response = await axios.post('/api/reportes', formData);
-                setReportes([...reportes, response.data]);
-                setFormData({ id_registro: '', id_administrador: '', fecha_inicio: '', fecha_fin: '', tipo_reporte: '', contenido: '' });
-            } catch (error) {
-                console.error('Error al agregar reporte:', error);
+        setLoading(true);
+        setTipoReporte(tipo); // Establecer el tipo de reporte aquí
+        try {
+            let url = `http://localhost:3001/reportes/generar?tipo=${tipo}`;
+            if (fechaInicio && fechaFin) {
+                url += `&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
             }
-        }
-    };
-
-    const eliminarReporte = async (id) => {
-        try {
-            await axios.delete(`/api/reportes/${id}`);
-            setReportes(reportes.filter((reporte) => reporte.id_reporte !== id));
+            const response = await axios.get(url);
+            console.log('Response status:', response.status); // Verificar el estado de la respuesta
+            console.log('Response data:', response.data); // Verificar los datos de respuesta
+            if (response.status === 200 && Array.isArray(response.data)) {
+                setReportes(response.data);
+            } else {
+                setReportes([]);
+                toast.error('Error al recibir los datos del reporte. Verifica que la API esté devolviendo un arreglo.');
+            }
         } catch (error) {
-            console.error('Error al eliminar reporte:', error);
+            console.error('Error al generar el reporte:', error);
+            toast.error('Error al generar el reporte. Verifica que el servidor esté respondiendo correctamente.');
         }
+        setLoading(false);
     };
 
-    const iniciarEdicion = (reporte) => {
-        setEditando(true);
-        setReporteEditando(reporte);
-        setFormData({
+    const exportarCSV = () => {
+        const csvData = reportes.map(reporte => ({
+            "Número de Registro": reporte.id_registro,
+            "Número de Empleado": reporte.numeroempleado,
+            "Nombre": reporte.nombre,
+            "Apellidos": reporte.apellidos,
+            "Departamento": reporte.departamento,
+            "Fecha Asistencia": reporte.fecha_asistencia,
+            "Hora Asistencia": reporte.hora_asistencia
+        }));
+
+        const csvContent = [
+            Object.keys(csvData[0]).join(","),
+            ...csvData.map(row => Object.values(row).join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", "reportes.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const exportarPDF = () => {
+        const doc = new jsPDF();
+
+        // Agregar logo al PDF
+        const img = new Image();
+        img.src = logoPath;
+        img.onload = () => {
+            doc.addImage(img, 'JPEG', 10, 10, 50, 20);
+            completarPDF(doc); // Pasar tipoReporte a la función completarPDF
+        };
+        img.onerror = (error) => {
+            console.error('Error al cargar el logo en el PDF:', error);
+            toast.error('Error al cargar el logo en el PDF.');
+            completarPDF(doc);  // Completar el PDF sin el logo
+        };
+    };
+
+    const completarPDF = (doc) => {
+        const columns = [
+            { header: "Número de Registro", dataKey: "id_registro" },
+            { header: "Número de Empleado", dataKey: "numeroempleado" },
+            { header: "Nombre", dataKey: "nombre" },
+            { header: "Apellidos", dataKey: "apellidos" },
+            { header: "Departamento", dataKey: "departamento" },
+            { header: "Fecha Asistencia", dataKey: "fecha_asistencia" },
+            { header: "Hora Asistencia", dataKey: "hora_asistencia" }
+        ];
+        const rows = reportes.map(reporte => ({
             id_registro: reporte.id_registro,
-            id_administrador: reporte.id_administrador,
-            fecha_inicio: reporte.fecha_inicio,
-            fecha_fin: reporte.fecha_fin,
-            tipo_reporte: reporte.tipo_reporte,
-            contenido: reporte.contenido
-        });
-    };
+            numeroempleado: reporte.numeroempleado,
+            nombre: reporte.nombre,
+            apellidos: reporte.apellidos,
+            departamento: reporte.departamento,
+            fecha_asistencia: reporte.fecha_asistencia,
+            hora_asistencia: reporte.hora_asistencia
+        }));
 
-    const editarReporte = async () => {
-        try {
-            const response = await axios.put(`/api/reportes/${reporteEditando.id_reporte}`, formData);
-            setReportes(
-                reportes.map((reporte) =>
-                    reporte.id_reporte === reporteEditando.id_reporte ? response.data : reporte
-                )
-            );
-            setFormData({ id_registro: '', id_administrador: '', fecha_inicio: '', fecha_fin: '', tipo_reporte: '', contenido: '' });
-            setEditando(false);
-            setReporteEditando(null);
-        } catch (error) {
-            console.error('Error al editar reporte:', error);
-        }
+        // Agregar el tipo de reporte y cantidad de registros
+        const tipoReporteTexto = tipoReporte.charAt(0).toUpperCase() + tipoReporte.slice(1);  // Capitalizar el tipo de reporte
+        const cantidadRegistros = rows.length;
+
+        doc.setFontSize(14);
+        doc.text(`Tipo de Reporte: Reporte ${tipoReporteTexto}`, 10, 35);
+        doc.text(`Cantidad de Registros: ${cantidadRegistros}`, 10, 45);
+
+        doc.autoTable({
+            columns: columns,
+            body: rows,
+            startY: 50,
+            theme: 'grid',
+            headStyles: { fillColor: '#B20027' }
+        });
+
+        doc.save("reportes.pdf");
     };
 
     return (
-        <div className="p-8 bg-white rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Reportes</h1>
-            <div className="mb-4 flex space-x-2">
-                <input
-                    type="number"
-                    name="id_registro"
-                    placeholder="ID Registro"
-                    value={formData.id_registro}
-                    onChange={handleChange}
-                    className="p-2 border border-gray-300 rounded-md"
-                />
-                <input
-                    type="number"
-                    name="id_administrador"
-                    placeholder="ID Administrador"
-                    value={formData.id_administrador}
-                    onChange={handleChange}
-                    className="p-2 border border-gray-300 rounded-md"
-                />
-                <input
-                    type="date"
-                    name="fecha_inicio"
-                    placeholder="Fecha Inicio"
-                    value={formData.fecha_inicio}
-                    onChange={handleChange}
-                    className="p-2 border border-gray-300 rounded-md"
-                />
-                <input
-                    type="date"
-                    name="fecha_fin"
-                    placeholder="Fecha Fin"
-                    value={formData.fecha_fin}
-                    onChange={handleChange}
-                    className="p-2 border border-gray-300 rounded-md"
-                />
-                <input
-                    type="text"
-                    name="tipo_reporte"
-                    placeholder="Tipo de Reporte"
-                    value={formData.tipo_reporte}
-                    onChange={handleChange}
-                    className="p-2 border border-gray-300 rounded-md"
-                />
-                <input
-                    type="text"
-                    name="contenido"
-                    placeholder="Contenido"
-                    value={formData.contenido}
-                    onChange={handleChange}
-                    className="p-2 border border-gray-300 rounded-md"
-                />
-                {editando ? (
-                    <button
-                        onClick={editarReporte}
-                        className="p-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition duration-200"
-                    >
-                        Editar
-                    </button>
+        <div className="flex flex-col min-h-screen">
+            <div className="p-4 flex-grow">
+                <h1 className="text-2xl mb-4">Reportes</h1>
+                <div className="mb-4">
+                    <label>
+                        Fecha Inicio:
+                        <input
+                            type="date"
+                            value={fechaInicio}
+                            onChange={(e) => setFechaInicio(e.target.value)}
+                            className="ml-2 p-2 border rounded"
+                        />
+                    </label>
+                    <label className="ml-4">
+                        Fecha Fin:
+                        <input
+                            type="date"
+                            value={fechaFin}
+                            onChange={(e) => setFechaFin(e.target.value)}
+                            className="ml-2 p-2 border rounded"
+                        />
+                    </label>
+                </div>
+                <div className="mb-4">
+                    <button onClick={() => generarReporte('diario')} className="mr-2 px-4 py-2 bg-darkRed text-white rounded">Diario</button>
+                    <button onClick={() => generarReporte('semanal')} className="mr-2 px-4 py-2 bg-darkRed text-white rounded">Semanal</button>
+                    <button onClick={() => generarReporte('mensual')} className="px-4 py-2 bg-darkRed text-white rounded">Mensual</button>
+                    <button onClick={exportarCSV} className="ml-4 px-4 py-2 bg-darkRed text-white rounded">Exportar CSV</button>
+                    <button onClick={exportarPDF} className="ml-4 px-4 py-2 bg-darkRed text-white rounded">Exportar PDF</button>
+                </div>
+                {loading ? (
+                    <div className="flex justify-center items-center">
+                        <FiLoader className="animate-spin text-4xl" />
+                    </div>
                 ) : (
-                    <button
-                        onClick={agregarReporte}
-                        className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-200"
-                    >
-                        <FaPlus />
-                    </button>
+                    <table className="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th className="py-2 px-4 border">Número de Registro</th>
+                                <th className="py-2 px-4 border">Número de Empleado</th>
+                                <th className="py-2 px-4 border">Nombre</th>
+                                <th className="py-2 px-4 border">Apellidos</th>
+                                <th className="py-2 px-4 border">Departamento</th>
+                                <th className="py-2 px-4 border">Fecha Asistencia</th>
+                                <th className="py-2 px-4 border">Hora Asistencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {reportes.map((reporte) => (
+                                <tr key={reporte.id_registro}>
+                                    <td className="py-2 px-4 border">{reporte.id_registro}</td>
+                                    <td className="py-2 px-4 border">{reporte.numeroempleado}</td>
+                                    <td className="py-2 px-4 border">{reporte.nombre}</td>
+                                    <td className="py-2 px-4 border">{reporte.apellidos}</td>
+                                    <td className="py-2 px-4 border">{reporte.departamento}</td>
+                                    <td className="py-2 px-4 border">{reporte.fecha_asistencia}</td>
+                                    <td className="py-2 px-4 border">{reporte.hora_asistencia}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 )}
             </div>
-            <table className="min-w-full bg-white border border-gray-200">
-                <thead>
-                    <tr>
-                        <th className="py-2 border-b">ID Reporte</th>
-                        <th className="py-2 border-b">ID Registro</th>
-                        <th className="py-2 border-b">ID Administrador</th>
-                        <th className="py-2 border-b">Fecha Inicio</th>
-                        <th className="py-2 border-b">Fecha Fin</th>
-                        <th className="py-2 border-b">Tipo de Reporte</th>
-                        <th className="py-2 border-b">Contenido</th>
-                        <th className="py-2 border-b">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {reportes.map((reporte) => (
-                        <tr key={reporte.id_reporte}>
-                            <td className="py-2 border-b">{reporte.id_reporte}</td>
-                            <td className="py-2 border-b">{reporte.id_registro}</td>
-                            <td className="py-2 border-b">{reporte.id_administrador}</td>
-                            <td className="py-2 border-b">{reporte.fecha_inicio}</td>
-                            <td className="py-2 border-b">{reporte.fecha_fin}</td>
-                            <td className="py-2 border-b">{reporte.tipo_reporte}</td>
-                            <td className="py-2 border-b">{reporte.contenido}</td>
-                            <td className="py-2 border-b space-x-2">
-                                <button
-                                    onClick={() => iniciarEdicion(reporte)}
-                                    className="p-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition duration-200"
-                                >
-                                    <FaEdit />
-                                </button>
-                                <button
-                                    onClick={() => eliminarReporte(reporte.id_reporte)}
-                                    className="p-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200"
-                                >
-                                    <FaTrash />
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <footer className="bg-white text-gray-800 p-4 text-center">
+                © {new Date().getFullYear()} Fiesta Inn Hoteles. Todos los derechos reservados.
+            </footer>
+            <ToastContainer />
         </div>
     );
 };

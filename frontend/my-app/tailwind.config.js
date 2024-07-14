@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        darkRed: '#B20027',  
+        darkRed: '#B20027',
       },
       fontFamily: {
         sans: ['Roboto', 'sans-serif'],

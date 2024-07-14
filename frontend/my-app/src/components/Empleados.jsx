@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { FaPlus, FaTrash, FaEdit, FaSearch, FaBuilding, FaUser, FaIdBadge, FaEnvelope, FaDownload } from 'react-icons/fa';
-import { QRCode } from 'react-qrcode-logo'; 
+import { QRCode } from 'react-qrcode-logo';
 import Footer from './Footer';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -234,7 +234,7 @@ const Empleados = () => {
                         <div className="flex justify-center md:justify-end">
                             <button
                                 type="submit"
-                                className="p-2 bg-fiestaRed-medium text-white rounded h-10 w-35 flex items-center justify-center shadow-md hover:bg-fiestaRed-dark transition duration-200"
+                                className="p-2 bg-[#B20027] text-white rounded-md h-10 w-35 flex items-center justify-center shadow-md hover:bg-[#742A2A] transition duration-200"
                             >
                                 {editMode ? 'Actualizar Empleado' : <>
                                     <FaPlus className="mr-2" />
@@ -294,25 +294,25 @@ const Empleados = () => {
                                     <td className="py-2 px-4 border-b border-gray-200 flex space-x-2">
                                         <button
                                             onClick={() => iniciarEdicion(empleado)}
-                                            className="p-1 bg-yellow-500 text-white rounded shadow-md hover:bg-yellow-600 transition duration-200"
+                                            className="p-1 bg-[#B20027] text-white rounded shadow-md hover:bg-[#742A2A] transition duration-200"
                                         >
                                             <FaEdit />
                                         </button>
                                         <button
                                             onClick={() => eliminarEmpleado(empleado.id_empleado)}
-                                            className="p-1 bg-red-500 text-white rounded shadow-md hover:bg-red-600 transition duration-200"
+                                            className="p-1 bg-[#B20027] text-white rounded shadow-md hover:bg-[#742A2A] transition duration-200"
                                         >
                                             <FaTrash />
                                         </button>
                                         <button
                                             onClick={() => handleDownloadQR(empleado)}
-                                            className="p-1 bg-green-500 text-white rounded shadow-md hover:bg-green-600 transition duration-200"
+                                            className="p-1 bg-[#B20027] text-white rounded shadow-md hover:bg-[#742A2A] transition duration-200"
                                         >
                                             <FaDownload />
                                         </button>
                                         <button
                                             onClick={() => enviarCorreoConQRCode(empleado)}
-                                            className="p-1 bg-blue-500 text-white rounded shadow-md hover:bg-blue-600 transition duration-200"
+                                            className="p-1 bg-[#B20027] text-white rounded shadow-md hover:bg-[#742A2A] transition duration-200"
                                         >
                                             <FaEnvelope />
                                         </button>

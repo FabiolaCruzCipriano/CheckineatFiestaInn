@@ -63,7 +63,7 @@ const Registro = () => {
             setEmpleadoNumero(data);
 
             try {
-                const response = await axios.post('http://localhost:3001/registros', {
+                const response = await axios.post('http://localhost:3001/registros/crear', { // Asegúrate de que la URL es correcta
                     numeroEmpleado: data,
                 });
 

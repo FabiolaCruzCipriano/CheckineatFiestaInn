@@ -29,8 +29,14 @@ exports.createEmpleado = async (req, res) => {
             email
         });
 
-        const qrDataUrl = `data:image/png;base64,${Buffer.from(await QRCode.toDataURL(numeroempleado)).toString('base64')}`;
-        await enviarCorreo(email, 'Tu código QR', '', `<p>Hola ${nombre},</p><p>Aquí está tu código QR:</p><img src="${qrDataUrl}" alt="Código QR" />`);
+        try {
+            const qrDataUrl = `data:image/png;base64,${Buffer.from(await QRCode.toDataURL(numeroempleado)).toString('base64')}`;
+            await enviarCorreo(email, 'Tu código QR', '', `<p>Hola ${nombre},</p><p>Aquí está tu código QR:</p><img src="${qrDataUrl}" alt="Código QR" />`);
+        } catch (emailError) {
+            console.error('Error al enviar el correo:', emailError);
+            // Opcional: puedes elegir no lanzar el error si el envío de correo falla
+            // res.status(500).send('Error al enviar el correo.');
+        }
 
         res.status(201).json(nuevoEmpleado);
     } catch (error) {

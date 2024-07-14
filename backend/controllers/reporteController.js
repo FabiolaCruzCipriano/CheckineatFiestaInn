@@ -1,71 +1,47 @@
-const Reporte = require('../models/reporte');
+const Registro = require('../models/registro');
+const { Op } = require('sequelize');
 
-const createReporte = async (req, res) => {
-    try {
-        const reporte = await Reporte.create(req.body);
-        res.status(201).json(reporte);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+const generarReporte = async (req, res) => {
+    const { tipo, fechaInicio, fechaFin } = req.query;
 
-const getReportes = async (req, res) => {
-    try {
-        const reportes = await Reporte.findAll();
-        res.status(200).json(reportes);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+    let startDate;
+    let endDate = new Date();
 
-const getReporteById = async (req, res) => {
-    try {
-        const reporte = await Reporte.findByPk(req.params.id);
-        if (reporte) {
-            res.status(200).json(reporte);
+    if (fechaInicio && fechaFin) {
+        startDate = new Date(fechaInicio);
+        endDate = new Date(fechaFin);
+    } else {
+        if (tipo === 'diario') {
+            startDate = new Date();
+            startDate.setHours(0, 0, 0, 0);
+        } else if (tipo === 'semanal') {
+            startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+        } else if (tipo === 'mensual') {
+            startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - 1);
         } else {
-            res.status(404).json({ error: 'Reporte no encontrado' });
+            return res.status(400).json({ error: 'Tipo de reporte no válido' });
         }
-    } catch (error) {
-        res.status(500).json({ error: error.message });
     }
-};
 
-const updateReporte = async (req, res) => {
     try {
-        const [updated] = await Reporte.update(req.body, {
-            where: { id_reporte: req.params.id }
+        const registros = await Registro.findAll({
+            where: {
+                fecha_asistencia: {
+                    [Op.between]: [startDate, endDate]
+                }
+            }
         });
-        if (updated) {
-            const updatedReporte = await Reporte.findByPk(req.params.id);
-            res.status(200).json(updatedReporte);
-        } else {
-            res.status(404).json({ error: 'Reporte no encontrado' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
 
-const deleteReporte = async (req, res) => {
-    try {
-        const deleted = await Reporte.destroy({
-            where: { id_reporte: req.params.id }
-        });
-        if (deleted) {
-            res.status(204).json();
-        } else {
-            res.status(404).json({ error: 'Reporte no encontrado' });
-        }
+        console.log('Registros generados:', registros);
+        res.status(200).json(registros);  // Devuelve solo el arreglo de registros
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Error al generar el reporte:', error);
+        res.status(500).json({ error: 'Error al generar el reporte' });
     }
 };
 
 module.exports = {
-    createReporte,
-    getReportes,
-    getReporteById,
-    updateReporte,
-    deleteReporte
+    generarReporte,
 };

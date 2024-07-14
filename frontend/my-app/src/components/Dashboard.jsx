@@ -199,7 +199,7 @@ const Dashboard = () => {
                 </div>
             </div>
             <footer className="bg-white shadow-md p-4 flex justify-center items-center">
-                <p className="text-gray-600">&copy; 2024 CheckInEat. Todos los derechos reservados.</p>
+                <p className="text-gray-600">&copy; 2024 Fiesta Inn Hoteles. Todos los derechos reservados.</p>
             </footer>
         </div>
     );
