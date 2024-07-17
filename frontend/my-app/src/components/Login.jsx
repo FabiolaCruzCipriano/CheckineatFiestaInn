@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 
-const Login = () => {
+const Login = ({ setAuth }) => {
     const [correoElectronico, setCorreoElectronico] = useState('');
     const [contrasena, setContrasena] = useState('');
     const [error, setError] = useState('');
@@ -14,7 +14,8 @@ const Login = () => {
                 correo_electronico: correoElectronico,
                 contrasena: contrasena
             });
-            console.log(response.data);
+            localStorage.setItem('token', response.data.token);
+            setAuth(true);
         } catch (error) {
             setError('Credenciales incorrectas');
         }
@@ -78,7 +79,7 @@ const Login = () => {
                         <div className="flex items-center justify-center">
                             <button
                                 type="submit"
-                                className="bg-[#CB0022] hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
+                                className="bg-[#B20027] hover:bg-red-700 text-white font-bold py-2 px-8 rounded-md focus:outline-none focus:shadow-outline"
                             >
                                 Login
                             </button>

@@ -32,9 +32,64 @@ body {
 
 .swal2-content {
   font-size: 16px !important;
-
 }
 
 .swal2-actions {
   font-size: 14px !important;
 }
+
+/* Estilos para react-datepicker */
+.react-datepicker__day--selected,
+.react-datepicker__day--in-range,
+.react-datepicker__day--keyboard-selected {
+  background-color: #B20027 !important;
+  color: white !important;
+}
+
+.react-datepicker {
+  @apply bg-white border border-gray-300 rounded-lg;
+}
+
+.react-datepicker__header {
+  @apply bg-gray-100 border-b border-gray-300;
+}
+
+.react-datepicker__current-month {
+  @apply text-gray-700;
+}
+
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker__time-name {
+  @apply text-gray-700;
+}
+.react-datepicker__day--selected,
+.react-datepicker__day--in-range,
+.react-datepicker__day--keyboard-selected {
+  background-color: #B20027 !important;
+  color: white !important;
+}
+
+.react-datepicker__header {
+  background-color: #B20027 !important;
+  color: white !important;
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker-year-header {
+  color: white !important;
+}
+
+.react-datepicker__day-name {
+  color: white !important;
+}
+.bg-custom-red {
+  background-color: #B20027;
+}
+
+.bg-custom-red-dark {
+  background-color: #8B0020;
+  /* Un tono más oscuro para el hover */
+}
+

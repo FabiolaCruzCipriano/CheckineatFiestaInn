@@ -5,6 +5,7 @@ const sequelize = require('../config/database');
 
 const basename = path.basename(__filename);
 const db = {};
+
 fs
   .readdirSync(__dirname)
   .filter(file => {
@@ -20,6 +21,8 @@ Object.keys(db).forEach(modelName => {
     db[modelName].associate(db);
   }
 });
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
+
 module.exports = db;

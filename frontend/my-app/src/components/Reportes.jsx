@@ -4,35 +4,25 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { FiLoader } from 'react-icons/fi';
+import { FaFileCsv, FaFilePdf } from 'react-icons/fa';
+import 'sweetalert2/src/sweetalert2.scss';
 
 const logoPath = '/logo.jpeg';  // Ruta relativa a la imagen del logo en la carpeta public
 
 const Reportes = () => {
     const [reportes, setReportes] = useState([]);
-    const [fechaInicio, setFechaInicio] = useState('');
-    const [fechaFin, setFechaFin] = useState('');
+    const [fechaInicio, setFechaInicio] = useState(new Date());
     const [loading, setLoading] = useState(false);
     const [tipoReporte, setTipoReporte] = useState(''); // Estado para el tipo de reporte
 
-    const validarFechas = () => {
-        if (new Date(fechaInicio) > new Date(fechaFin)) {
-            toast.error('La fecha de inicio no puede ser mayor que la fecha de fin.');
-            return false;
-        }
-        return true;
-    };
-
     const generarReporte = async (tipo) => {
-        if (!validarFechas()) return;
-
         setLoading(true);
         setTipoReporte(tipo); // Establecer el tipo de reporte aquí
         try {
-            let url = `http://localhost:3001/reportes/generar?tipo=${tipo}`;
-            if (fechaInicio && fechaFin) {
-                url += `&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
-            }
+            let url = `http://localhost:3001/reportes/generar?tipo=${tipo}&fechaInicio=${fechaInicio.toISOString()}`;
             const response = await axios.get(url);
             console.log('Response status:', response.status); // Verificar el estado de la respuesta
             console.log('Response data:', response.data); // Verificar los datos de respuesta
@@ -131,67 +121,85 @@ const Reportes = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen font-roboto">
             <div className="p-4 flex-grow">
-                <h1 className="text-2xl mb-4">Reportes</h1>
-                <div className="mb-4">
-                    <label>
-                        Fecha Inicio:
-                        <input
-                            type="date"
-                            value={fechaInicio}
-                            onChange={(e) => setFechaInicio(e.target.value)}
-                            className="ml-2 p-2 border rounded"
-                        />
-                    </label>
-                    <label className="ml-4">
-                        Fecha Fin:
-                        <input
-                            type="date"
-                            value={fechaFin}
-                            onChange={(e) => setFechaFin(e.target.value)}
-                            className="ml-2 p-2 border rounded"
+                <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Reportes</h1>
+                <div className="mb-4 flex items-center">
+                    <label className="mr-4 text-gray-700">
+                        Fecha:
+                        <DatePicker
+                            selected={fechaInicio}
+                            onChange={(date) => setFechaInicio(date)}
+                            className="ml-2 p-2 border border-gray-300 rounded focus:ring focus:ring-fiestaRed-light"
+                            dateFormat="dd/MM/yyyy"
                         />
                     </label>
                 </div>
-                <div className="mb-4">
-                    <button onClick={() => generarReporte('diario')} className="mr-2 px-4 py-2 bg-darkRed text-white rounded">Diario</button>
-                    <button onClick={() => generarReporte('semanal')} className="mr-2 px-4 py-2 bg-darkRed text-white rounded">Semanal</button>
-                    <button onClick={() => generarReporte('mensual')} className="px-4 py-2 bg-darkRed text-white rounded">Mensual</button>
-                    <button onClick={exportarCSV} className="ml-4 px-4 py-2 bg-darkRed text-white rounded">Exportar CSV</button>
-                    <button onClick={exportarPDF} className="ml-4 px-4 py-2 bg-darkRed text-white rounded">Exportar PDF</button>
+                <div className="mb-4 flex space-x-4">
+                    <button
+                        onClick={() => generarReporte('diario')}
+                        className="px-4 py-2 bg-[#B20027] text-white rounded-md shadow-md hover:bg-[#742A2A] transition duration-200 flex items-center"
+                    >
+                        {loading ? <FiLoader className="animate-spin mr-2" /> : 'Diario'}
+                    </button>
+                    <button
+                        onClick={() => generarReporte('semanal')}
+                        className="px-4 py-2 bg-[#B20027] text-white rounded-md shadow-md hover:bg-[#742A2A] transition duration-200 flex items-center"
+                    >
+                        {loading ? <FiLoader className="animate-spin mr-2" /> : 'Semanal'}
+                    </button>
+                    <button
+                        onClick={() => generarReporte('mensual')}
+                        className="px-4 py-2 bg-[#B20027] text-white rounded-md shadow-md hover:bg-[#742A2A] transition duration-200 flex items-center"
+                    >
+                        {loading ? <FiLoader className="animate-spin mr-2" /> : 'Mensual'}
+                    </button>
+                    <button
+                        onClick={exportarCSV}
+                        className="ml-4 px-4 py-2 bg-[#B20027] text-white rounded-md shadow-md hover:bg-[#742A2A] transition duration-200 flex items-center"
+                    >
+                        <FaFileCsv className="mr-2" /> Exportar CSV
+                    </button>
+                    <button
+                        onClick={exportarPDF}
+                        className="ml-4 px-4 py-2 bg-[#B20027] text-white rounded-md shadow-md hover:bg-[#742A2A] transition duration-200 flex items-center"
+                    >
+                        <FaFilePdf className="mr-2" /> Exportar PDF
+                    </button>
                 </div>
                 {loading ? (
                     <div className="flex justify-center items-center">
                         <FiLoader className="animate-spin text-4xl" />
                     </div>
                 ) : (
-                    <table className="min-w-full bg-white">
-                        <thead>
-                            <tr>
-                                <th className="py-2 px-4 border">Número de Registro</th>
-                                <th className="py-2 px-4 border">Número de Empleado</th>
-                                <th className="py-2 px-4 border">Nombre</th>
-                                <th className="py-2 px-4 border">Apellidos</th>
-                                <th className="py-2 px-4 border">Departamento</th>
-                                <th className="py-2 px-4 border">Fecha Asistencia</th>
-                                <th className="py-2 px-4 border">Hora Asistencia</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {reportes.map((reporte) => (
-                                <tr key={reporte.id_registro}>
-                                    <td className="py-2 px-4 border">{reporte.id_registro}</td>
-                                    <td className="py-2 px-4 border">{reporte.numeroempleado}</td>
-                                    <td className="py-2 px-4 border">{reporte.nombre}</td>
-                                    <td className="py-2 px-4 border">{reporte.apellidos}</td>
-                                    <td className="py-2 px-4 border">{reporte.departamento}</td>
-                                    <td className="py-2 px-4 border">{reporte.fecha_asistencia}</td>
-                                    <td className="py-2 px-4 border">{reporte.hora_asistencia}</td>
+                    <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-lg">
+                        <table className="min-w-full">
+                            <thead>
+                                <tr className="bg-gray-50">
+                                    <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Número de Registro</th>
+                                    <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Número de Empleado</th>
+                                    <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Nombre</th>
+                                    <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Apellidos</th>
+                                    <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Departamento</th>
+                                    <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Fecha Asistencia</th>
+                                    <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Hora Asistencia</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {reportes.map((reporte) => (
+                                    <tr key={reporte.id_registro} className="hover:bg-gray-50 transition duration-200">
+                                        <td className="py-2 px-4 border-b border-gray-200">{reporte.id_registro}</td>
+                                        <td className="py-2 px-4 border-b border-gray-200">{reporte.numeroempleado}</td>
+                                        <td className="py-2 px-4 border-b border-gray-200">{reporte.nombre}</td>
+                                        <td className="py-2 px-4 border-b border-gray-200">{reporte.apellidos}</td>
+                                        <td className="py-2 px-4 border-b border-gray-200">{reporte.departamento}</td>
+                                        <td className="py-2 px-4 border-b border-gray-200">{reporte.fecha_asistencia}</td>
+                                        <td className="py-2 px-4 border-b border-gray-200">{reporte.hora_asistencia}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
             <footer className="bg-white text-gray-800 p-4 text-center">

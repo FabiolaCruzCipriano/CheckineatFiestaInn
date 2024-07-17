@@ -1,7 +1,9 @@
 const express = require('express');
-const router = express.Router();
-const asistenciaController = require('../controllers/asistenciaController');
+const { getAsistenciaDiaria, getAsistenciaMensual } = require('../controllers/asistenciaController');
 
-router.get('/diaria', asistenciaController.getAsistenciaDiaria);
+const router = express.Router();
+
+router.get('/diaria', getAsistenciaDiaria);
+router.get('/mensual', getAsistenciaMensual);
 
 module.exports = router;

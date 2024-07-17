@@ -15,7 +15,7 @@ const departamentoRoutes = require('./routes/departamentoRoutes');
 const reporteRoutes = require('./routes/reporteRoutes');
 const authRoutes = require('./routes/authRoutes');
 const asistenciaRoutes = require('./routes/asistenciaRoutes');
-
+const db = require('./models'); // Asegúrate de importar los modelos
 const app = express();
 
 app.use(bodyParser.json());
@@ -29,6 +29,10 @@ app.use(session({
     store: new SequelizeStore({ db: sequelize }),
     resave: false,
     saveUninitialized: false,
+    cookie: {
+        secure: false, // En producción, asegúrate de que esté configurado en true si usas HTTPS
+        maxAge: 1000 * 60 * 60 * 24 // 24 horas
+    }
 }));
 
 app.post('/api/enviarCorreo', async (req, res) => {
@@ -56,6 +60,7 @@ app.use('/registros', registroRoutes);
 app.use('/departamentos', departamentoRoutes);
 app.use('/reportes', reporteRoutes);
 app.use('/asistencia', asistenciaRoutes);
+
 
 // Servir archivos estáticos de React
 app.use(express.static(path.join(__dirname, 'frontend', 'my-app', 'build')));

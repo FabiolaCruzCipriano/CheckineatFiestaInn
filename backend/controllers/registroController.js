@@ -11,15 +11,15 @@ exports.createRegistro = async (req, res) => {
         }
 
         const fechaHora = new Date();
-        const fechaAsistencia = fechaHora.toISOString().split('T')[0];
-        const horaAsistencia = fechaHora.toTimeString().split(' ')[0];
+        const fechaAsistencia = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'America/Mexico_City' }).format(fechaHora);
+        const horaAsistencia = new Intl.DateTimeFormat('en-CA', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'America/Mexico_City' }).format(fechaHora);
 
         const registro = await Registro.create({
             numeroempleado: numeroEmpleado,
             nombre: empleado.nombre,
             apellidos: empleado.apellidos,
             departamento: empleado.nombre_departamento,
-            fecha_asistencia: fechaAsistencia,
+            fecha_asistencia: fechaAsistencia.split('/').reverse().join('-'), // Convertir a formato YYYY-MM-DD
             hora_asistencia: horaAsistencia
         });
 

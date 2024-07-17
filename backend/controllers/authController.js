@@ -1,71 +1,42 @@
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const Administrador = require('../models/administrador');
-
-const register = async (req, res) => {
-    const { nombre, apellido, correo_electronico, contrasena } = req.body;
-
-try {
-        const existingAdmin = await Administrador.findOne({ where: { correo_electronico } });
-        if (existingAdmin) {
-            return res.status(400).json({ error: 'El correo electrónico ya está en uso' });
-        }
-
-        const hashedPassword = await bcrypt.hash(contrasena, 10);
-        console.log('Hashed password during registration:', hashedPassword);
-
-        const newAdmin = await Administrador.create({
-            nombre,
-            apellido,
-            correo_electronico,
-            contrasena: hashedPassword,
-        });
-
-        res.status(201).json(newAdmin);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+const { Administrador } = require('../models');
 
 const login = async (req, res) => {
     const { correo_electronico, contrasena } = req.body;
-
     try {
-        console.log('Attempting login for:', correo_electronico);
         const admin = await Administrador.findOne({ where: { correo_electronico } });
         if (!admin) {
-            console.log('Admin not found');
-            return res.status(401).json({ error: 'Credenciales incorrectas' });
+            return res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos' });
+        }
+        const isMatch = await bcrypt.compare(contrasena, admin.contrasena);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos' });
         }
 
-        console.log('Admin found:', admin);
-        console.log('Provided password:', contrasena);
-        console.log('Stored password:', admin.contrasena);
+        // Crear token JWT
+        const token = jwt.sign({ id: admin.id_administrador }, 'your_jwt_secret', { expiresIn: '1h' });
 
-        const isPasswordValid = await bcrypt.compare(contrasena, admin.contrasena);
-        console.log('Password valid:', isPasswordValid);
+        // Guardar sesión en el servidor
+        req.session.token = token;
 
-        if (!isPasswordValid) {
-            return res.status(401).json({ error: 'Credenciales incorrectas' });
-        }
-
-        req.session.user = admin; // Guardar datos de sesión
-        res.status(200).json({ message: 'Inicio de sesión exitoso' });
+        res.json({ token });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: 'Error al iniciar sesión' });
     }
 };
 
 const logout = (req, res) => {
-    req.session.destroy(err => {
+    req.session.destroy((err) => {
         if (err) {
-            return res.status(500).json({ error: err.message });
+            return res.status(500).json({ message: 'Error al cerrar sesión' });
         }
-        res.status(200).json({ message: 'Cierre de sesión exitoso' });
+        res.clearCookie('connect.sid');
+        res.json({ message: 'Sesión cerrada exitosamente' });
     });
 };
 
 module.exports = {
-    register,
     login,
-    logout,
+    logout
 };

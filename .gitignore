@@ -44,3 +44,4 @@ temp/
 *.user
 *.userosscache
 *.sln.docstates
+node_modules

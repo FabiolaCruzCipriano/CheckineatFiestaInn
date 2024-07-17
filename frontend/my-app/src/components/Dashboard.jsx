@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaUser, FaBuilding, FaChartBar, FaBell, FaCog, FaBars, FaTimes, FaClipboardList, FaCheckCircle } from 'react-icons/fa';
-import { Line, Bar } from 'react-chartjs-2';
+import { FaUser, FaBuilding, FaChartBar, FaBars, FaTimes, FaClipboardList, FaCheckCircle, FaUserShield } from 'react-icons/fa';
+import { Line } from 'react-chartjs-2';
 import axios from 'axios';
 import StatCard from './StatCard';
 
@@ -16,6 +16,8 @@ import {
     Tooltip,
     Legend,
     Filler,
+    BarController,
+    BarController as BarControllerElement
 } from 'chart.js';
 
 ChartJS.register(
@@ -27,7 +29,9 @@ ChartJS.register(
     Title,
     Tooltip,
     Legend,
-    Filler
+    Filler,
+    BarController,
+    BarControllerElement
 );
 
 const Dashboard = () => {
@@ -35,6 +39,7 @@ const Dashboard = () => {
     const [totalEmpleados, setTotalEmpleados] = useState(0);
     const [totalDepartamentos, setTotalDepartamentos] = useState(0);
     const [asistenciaDiaria, setAsistenciaDiaria] = useState(0);
+    const [asistenciaPorMes, setAsistenciaPorMes] = useState(Array(12).fill(0));
 
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
@@ -49,51 +54,39 @@ const Dashboard = () => {
                 const departamentosResponse = await axios.get('http://localhost:3001/departamentos/total');
                 setTotalDepartamentos(departamentosResponse.data.count);
 
-                const asistenciaResponse = await axios.get('http://localhost:3001/asistencia/diaria');
-                setAsistenciaDiaria(asistenciaResponse.data.asistenciaDiaria);
+                const asistenciaDiariaResponse = await axios.get('http://localhost:3001/asistencia/diaria');
+                console.log('Asistencia Diaria:', asistenciaDiariaResponse.data.asistenciaDiaria); // Añadir este console log
+                setAsistenciaDiaria(asistenciaDiariaResponse.data.asistenciaDiaria);
+
+                const asistenciaMensualResponse = await axios.get('http://localhost:3001/asistencia/mensual');
+                const asistenciaPorMesData = asistenciaMensualResponse.data;
+                setAsistenciaPorMes(asistenciaPorMesData);
             } catch (error) {
                 console.error('Error fetching counts:', error);
-                // alert('Error fetching data. Please try again later.'); // Esta es la línea que debes comentar o eliminar
             }
         };
 
         fetchCounts();
     }, []);
 
-    const empleadosData = {
+    const asistenciaData = {
         labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
         datasets: [
             {
-                label: 'Empleados',
-                data: [12, 19, 3, 5, 2, 3, 7, 11, 6, 9, 15, 12], // Replace with real data if available
+                type: 'bar',
+                label: 'Asistencia Comedor',
+                data: asistenciaPorMes,
                 backgroundColor: 'rgba(178, 0, 39, 0.2)',
                 borderColor: '#B20027',
                 borderWidth: 2,
-                pointBackgroundColor: '#B20027',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: '#B20027',
-                fill: true,
-                tension: 0.4,
-            },
-        ],
-    };
-
-    const departamentosData = {
-        labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-        datasets: [
-            {
-                label: 'Departamentos',
-                data: [4, 5, 4, 6, 5, 6, 7, 8, 7, 6, 5, 6], // Replace with real data if available
-                backgroundColor: '#B20027',
-                borderColor: '#B20027',
-                borderWidth: 1,
+                yAxisID: 'y1',
             },
         ],
     };
 
     const chartOptions = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 display: true,
@@ -120,7 +113,9 @@ const Dashboard = () => {
                     color: 'rgba(200, 200, 200, 0.2)',
                 },
             },
-            y: {
+            y1: {
+                type: 'linear',
+                position: 'left',
                 ticks: {
                     color: 'gray',
                 },
@@ -132,28 +127,28 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-100 font-sans">
-            <header className="bg-white shadow-md p-4 flex justify-between items-center">
+        <div className="flex flex-col min-h-screen bg-gradient-to-r from-gray-100 to-gray-200 font-sans">
+            <header className="bg-white shadow-md p-4 flex justify-between items-center rounded-b-lg">
                 <div className="flex items-center">
                     <button onClick={toggleSidebar} className="md:hidden text-gray-800 hover:text-gray-600 transition duration-200">
                         {sidebarOpen ? <FaTimes /> : <FaBars />}
                     </button>
-                    <img src="/logo.jpeg" alt="Logo" className="h-10 mr-3" />
+                    <img src="/logo.jpeg" alt="Logo" className="h-10 mr-3 rounded-lg" />
                     <h1 className="text-2xl font-bold text-gray-800">CheckInEat</h1>
-                </div>
-                <div className="flex items-center space-x-4">
-                    <FaBell className="text-gray-800 hover:text-gray-600 transition duration-200" />
-                    <FaCog className="text-gray-800 hover:text-gray-600 transition duration-200" />
-                    <div className="text-gray-800">John Doe</div>
                 </div>
             </header>
 
             <div className="flex flex-1">
-                <div className={`fixed md:static z-50 w-64 bg-[#B20027] text-white shadow-lg flex flex-col justify-between transition-transform duration-300 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+                <div className={`fixed md:static z-50 w-64 bg-[#B20027] text-white shadow-lg flex flex-col justify-between transition-transform duration-300 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} rounded-r-lg`}>
                     <div>
                         <div className="p-8 text-2xl font-extrabold border-b">Dashboard</div>
                         <nav className="p-6">
                             <ul>
+                                <li className="mb-4">
+                                    <Link to="/administradores" className="flex items-center text-white hover:text-gray-200 transition-colors duration-200">
+                                        <FaUserShield className="mr-2" /> Administrador
+                                    </Link>
+                                </li>
                                 <li className="mb-4">
                                     <Link to="/empleados" className="flex items-center text-white hover:text-gray-200 transition-colors duration-200">
                                         <FaUser className="mr-2" /> Empleados
@@ -174,6 +169,7 @@ const Dashboard = () => {
                                         <FaChartBar className="mr-2" /> Reportes
                                     </Link>
                                 </li>
+                                
                             </ul>
                         </nav>
                     </div>
@@ -186,19 +182,17 @@ const Dashboard = () => {
                         <StatCard title="Asistencia Diaria" value={asistenciaDiaria} icon={<FaCheckCircle />} color="bg-[#B20027]" />
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div className="grid grid-cols-1 gap-6 mb-6">
                         <div className="bg-white p-4 rounded-lg shadow-md">
-                            <h2 className="text-xl font-bold mb-4">Empleados por Mes</h2>
-                            <Line data={empleadosData} options={chartOptions} />
-                        </div>
-                        <div className="bg-white p-4 rounded-lg shadow-md">
-                            <h2 className="text-xl font-bold mb-4">Departamentos por Mes</h2>
-                            <Bar data={departamentosData} options={chartOptions} />
+                            <h2 className="text-xl font-bold mb-4">Asistencia Mensual</h2>
+                            <div style={{ height: '300px' }}>
+                                <Line data={asistenciaData} options={chartOptions} />
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <footer className="bg-white shadow-md p-4 flex justify-center items-center">
+            <footer className="bg-white shadow-md p-4 flex justify-center items-center rounded-t-lg">
                 <p className="text-gray-600">&copy; 2024 Fiesta Inn Hoteles. Todos los derechos reservados.</p>
             </footer>
         </div>

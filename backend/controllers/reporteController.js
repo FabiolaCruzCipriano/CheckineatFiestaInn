@@ -14,6 +14,7 @@ const generarReporte = async (req, res) => {
         if (tipo === 'diario') {
             startDate = new Date();
             startDate.setHours(0, 0, 0, 0);
+            endDate = new Date(startDate);  // Ensure the end date is the same day
         } else if (tipo === 'semanal') {
             startDate = new Date();
             startDate.setDate(startDate.getDate() - 7);
@@ -24,6 +25,10 @@ const generarReporte = async (req, res) => {
             return res.status(400).json({ error: 'Tipo de reporte no válido' });
         }
     }
+
+    console.log(`Tipo de reporte: ${tipo}`);
+    console.log(`Fecha Inicio: ${startDate.toISOString()}`);
+    console.log(`Fecha Fin: ${endDate.toISOString()}`);
 
     try {
         const registros = await Registro.findAll({

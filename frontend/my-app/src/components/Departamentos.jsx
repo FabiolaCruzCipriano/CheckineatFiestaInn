@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import Modal from 'react-modal';
 import { FaPlus, FaTrash, FaEdit, FaSearch, FaBuilding } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
@@ -7,6 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import 'sweetalert2/src/sweetalert2.scss';
 import Footer from './Footer';
+import { Oval } from 'react-loader-spinner';
 
 const schema = yup.object().shape({
     nombre_departamento: yup.string().required('Nombre del departamento es requerido')
@@ -21,6 +23,7 @@ const Departamentos = () => {
     const [editMode, setEditMode] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const cargarDepartamentos = useCallback(async () => {
         setIsLoading(true);
@@ -48,7 +51,9 @@ const Departamentos = () => {
                 popup: 'swal2-popup-custom',
                 title: 'swal2-title',
                 content: 'swal2-content',
-                actions: 'swal2-actions'
+                actions: 'swal2-actions',
+                confirmButton: `rounded-md p-2 ${type === 'success' ? 'bg-[#00bb2d]' : 'bg-[#B20027]'} text-white hover:${type === 'success' ? 'bg-green-600' : 'bg-[#742A2A]'} transition duration-200`,
+                cancelButton: 'rounded-md p-2 bg-blue-500 text-white hover:bg-blue-600 transition duration-200'
             }
         });
     };
@@ -68,6 +73,7 @@ const Departamentos = () => {
             setEditMode(false);
             setEditingId(null);
             setIsLoading(false);
+            setModalIsOpen(false);
         } catch (error) {
             showMessage('Error al procesar el departamento.', 'error');
             setIsLoading(false);
@@ -80,6 +86,7 @@ const Departamentos = () => {
         });
         setEditMode(true);
         setEditingId(departamento.id_departamento);
+        setModalIsOpen(true);
     };
 
     const eliminarDepartamento = async (id_departamento) => {
@@ -88,14 +95,17 @@ const Departamentos = () => {
             text: "¡No podrás revertir esto!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            confirmButtonColor: '#B20027',
+            cancelButtonColor: '#3B82F6', // Azul personalizado bg-blue-500
             confirmButtonText: 'Sí, eliminarlo!',
+            cancelButtonText: 'Cancelar',
             customClass: {
                 popup: 'swal2-popup-custom',
                 title: 'swal2-title',
                 content: 'swal2-content',
-                actions: 'swal2-actions'
+                actions: 'swal2-actions',
+                confirmButton: 'rounded-md p-2 bg-[#B20027] text-white hover:bg-[#742A2A] transition duration-200',
+                cancelButton: 'rounded-md p-2 bg-blue-500 text-white hover:bg-blue-600 transition duration-200'
             }
         }).then(async (result) => {
             if (result.isConfirmed) {
@@ -118,34 +128,58 @@ const Departamentos = () => {
             <main>
                 <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Departamentos</h1>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="mb-6 p-4 border rounded-md shadow-md bg-white">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="relative">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                                <FaBuilding className="text-gray-400" />
-                            </span>
-                            <input
-                                type="text"
-                                placeholder="Nombre del Departamento"
-                                {...register('nombre_departamento')}
-                                className={`p-2 pl-10 border ${errors.nombre_departamento ? 'border-red-500' : 'border-gray-300'} rounded-md w-full focus:ring focus:ring-fiestaRed-light`}
-                            />
-                            {errors.nombre_departamento && <p className="text-red-500 text-sm mt-1">{errors.nombre_departamento.message}</p>}
-                        </div>
-                        <div className="flex justify-center md:justify-end">
-                            <button
-                                type="submit"
-                                className="p-2 bg-[#B20027] text-white rounded-md h-10 w-40 flex items-center justify-center shadow-md hover:bg-[#742A2A] transition duration-200"
-                                disabled={isLoading}
-                            >
-                                {editMode ? 'Actualizar Departamento' : <>
-                                    <FaPlus className="mr-2" />
-                                    {isLoading ? 'Procesando...' : 'Agregar'}
-                                </>}
-                            </button>
-                        </div>
+                <button
+                    onClick={() => setModalIsOpen(true)}
+                    className="p-2 mb-6 bg-[#B20027] text-white rounded-md h-10 w-35 flex items-center justify-center shadow-md hover:bg-[#742A2A] transition duration-200"
+                >
+                    <FaPlus className="mr-2" />
+                    Agregar Departamento
+                </button>
+
+                <Modal
+                    isOpen={modalIsOpen}
+                    onRequestClose={() => setModalIsOpen(false)}
+                    contentLabel="Formulario de Departamento"
+                    className="flex items-center justify-center h-full"
+                    overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+                >
+                    <div className="relative bg-white rounded-lg shadow p-8 w-full max-w-xl">
+                        <button onClick={() => setModalIsOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                            &times;
+                        </button>
+                        <h2 className="text-2xl mb-4 font-semibold text-gray-700">Agregar Departamento</h2>
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                            <div className="relative">
+                                <FaBuilding className="absolute left-3 top-3 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Nombre del Departamento"
+                                    {...register('nombre_departamento')}
+                                    className={`pl-10 p-2 border ${errors.nombre_departamento ? 'border-red-500' : 'border-gray-300'} rounded w-full focus:ring focus:ring-[#B20027]`}
+                                />
+                                {errors.nombre_departamento && <p className="text-red-500 text-sm mt-1">{errors.nombre_departamento.message}</p>}
+                            </div>
+                            <div className="flex justify-end mt-4">
+                                <button
+                                    type="submit"
+                                    className="p-2 bg-[#B20027] text-white rounded-md h-10 w-35 flex items-center justify-center shadow-md hover:bg-[#742A2A] transition duration-200"
+                                >
+                                    {editMode ? 'Actualizar Departamento' : <>
+                                        <FaPlus className="mr-2" />
+                                        Agregar Departamento
+                                    </>}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setModalIsOpen(false)}
+                                    className="p-2 ml-4 bg-blue-500 text-white rounded-md h-10 w-35 flex items-center justify-center shadow-md hover:bg-blue-600 transition duration-200"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </Modal>
 
                 <div className="relative mb-6 max-w-xs">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -156,43 +190,49 @@ const Departamentos = () => {
                         placeholder="Buscar departamento"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="p-2 pl-8 border border-gray-300 rounded-md w-full focus:ring focus:ring-fiestaRed-light"
+                        className="p-2 pl-8 border border-gray-300 rounded w-full focus:ring focus:ring-[#B20027]"
                     />
                 </div>
 
                 <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-lg">
-                    <table className="min-w-full">
-                        <thead>
-                            <tr className="bg-gray-50">
-                                <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Nombre del Departamento</th>
-                                <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {departamentos.filter((departamento) =>
-                                departamento.nombre_departamento.toLowerCase().includes(searchTerm.toLowerCase())
-                            ).map((departamento) => (
-                                <tr key={departamento.id_departamento} className="hover:bg-gray-50 transition duration-200">
-                                    <td className="py-2 px-4 border-b border-gray-200">{departamento.nombre_departamento}</td>
-                                    <td className="py-2 px-4 border-b border-gray-200 flex space-x-2">
-                                        <button
-                                            onClick={() => iniciarEdicion(departamento)}
-                                            className="p-1 bg-[#B20027] text-white rounded-md shadow-md hover:bg-[#742A2A] transition duration-200"
-                                        >
-                                            <FaEdit />
-                                        </button>
-                                        <button
-                                            onClick={() => eliminarDepartamento(departamento.id_departamento)}
-                                            className="p-1 bg-[#B20027] text-white rounded-md shadow-md hover:bg-[#742A2A] transition duration-200"
-                                            disabled={isLoading}
-                                        >
-                                            <FaTrash />
-                                        </button>
-                                    </td>
+                    {isLoading ? (
+                        <div className="flex justify-center">
+                            <Oval height="100" width="100" color="#B20027" ariaLabel="loading" />
+                        </div>
+                    ) : (
+                        <table className="min-w-full">
+                            <thead>
+                                <tr className="bg-gray-50">
+                                    <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Nombre del Departamento</th>
+                                    <th className="py-2 px-4 border-b-2 border-gray-200 text-left text-xs md:text-sm leading-4 text-gray-600">Acciones</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {departamentos.filter((departamento) =>
+                                    departamento.nombre_departamento.toLowerCase().includes(searchTerm.toLowerCase())
+                                ).map((departamento) => (
+                                    <tr key={departamento.id_departamento} className="hover:bg-gray-50 transition duration-200">
+                                        <td className="py-2 px-4 border-b border-gray-200">{departamento.nombre_departamento}</td>
+                                        <td className="py-2 px-4 border-b border-gray-200 flex space-x-2">
+                                            <button
+                                                onClick={() => iniciarEdicion(departamento)}
+                                                className="p-1 bg-[#B20027] text-white rounded shadow-md hover:bg-[#742A2A] transition duration-200"
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                            <button
+                                                onClick={() => eliminarDepartamento(departamento.id_departamento)}
+                                                className="p-1 bg-[#B20027] text-white rounded shadow-md hover:bg-[#742A2A] transition duration-200"
+                                                disabled={isLoading}
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </main>
             <Footer />
