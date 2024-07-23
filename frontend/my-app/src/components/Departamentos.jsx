@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import 'sweetalert2/src/sweetalert2.scss';
-import Footer from './Footer';
 import { Oval } from 'react-loader-spinner';
 
 const schema = yup.object().shape({
@@ -234,9 +233,12 @@ const Departamentos = () => {
                         </table>
                     )}
                 </div>
+                <footer className="bg-white text-gray-800 p-4 text-center">
+                    © {new Date().getFullYear()} Fiesta Inn Hoteles. Todos los derechos reservados.
+                </footer>
             </main>
-            <Footer />
         </div>
+        
     );
 };
 

@@ -134,7 +134,6 @@ const Dashboard = () => {
                         {sidebarOpen ? <FaTimes /> : <FaBars />}
                     </button>
                     <img src="/logo.jpeg" alt="Logo" className="h-10 mr-3 rounded-lg" />
-                    <h1 className="text-2xl font-bold text-gray-800">CheckInEat</h1>
                 </div>
             </header>
 

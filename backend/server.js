@@ -15,7 +15,7 @@ const departamentoRoutes = require('./routes/departamentoRoutes');
 const reporteRoutes = require('./routes/reporteRoutes');
 const authRoutes = require('./routes/authRoutes');
 const asistenciaRoutes = require('./routes/asistenciaRoutes');
-const db = require('./models'); // Asegúrate de importar los modelos
+const db = require('./models'); 
 const app = express();
 
 app.use(bodyParser.json());

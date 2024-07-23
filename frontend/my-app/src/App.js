@@ -5,9 +5,9 @@ import Dashboard from './components/Dashboard';
 import Empleados from './components/Empleados';
 import Departamentos from './components/Departamentos';
 import Reportes from './components/Reportes';
-import Registro from './components/Registro'; // Asegúrate de que está importado correctamente
-import VerRegistros from './components/VerRegistros'; // Importa el nuevo componente
-import Administradores from './components/Administradores'; // Importa el nuevo componente Admin
+import Registro from './components/Registro'; 
+import VerRegistros from './components/VerRegistros'; 
+import Administradores from './components/Administradores'; 
 
 const App = () => {
   const [isAuth, setIsAuth] = useState(false);

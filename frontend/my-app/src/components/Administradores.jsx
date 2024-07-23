@@ -7,7 +7,6 @@ import 'sweetalert2/src/sweetalert2.scss';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import Footer from './Footer';
 
 const schema = yup.object().shape({
     nombre: yup.string().required('Nombre es requerido'),
@@ -97,8 +96,8 @@ const Administradores = () => {
     };
 
     return (
-        <div className="p-4 md:p-8 bg-gray-100 min-h-screen flex flex-col justify-between font-roboto">
-            <main>
+        <div className="p-4 md:p-8 bg-gray-100 min-h-screen flex flex-col">
+            <main className="flex-grow">
                 <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Administradores</h1>
 
                 <button
@@ -212,7 +211,9 @@ const Administradores = () => {
                     </table>
                 </div>
             </main>
-            <Footer />
+            <footer className="bg-white text-gray-800 p-4 text-center">
+                © {new Date().getFullYear()} Fiesta Inn Hoteles. Todos los derechos reservados.
+            </footer>
         </div>
     );
 };
